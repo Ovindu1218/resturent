@@ -1,0 +1,2182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KOCHCHI - Authentic Sri Lankan Cuisine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.158.0/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        spice: {
+                            50: '#FFF5F5',
+                            100: '#FFE6E6',
+                            200: '#FFC0C0',
+                            300: '#FF9999',
+                            400: '#FF6666',
+                            500: '#FF3333',
+                            600: '#E60000',
+                            700: '#B30000',
+                            800: '#800000',
+                            900: '#4D0000',
+                        },
+                        curry: {
+                            50: '#FFFDE6',
+                            100: '#FFF9BF',
+                            200: '#FFF380',
+                            300: '#FFEC40',
+                            400: '#FFE500',
+                            500: '#CCBB00',
+                            600: '#998D00',
+                            700: '#665E00',
+                            800: '#332F00',
+                            900: '#191700',
+                        },
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        .text-shadow {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hover-scale {
+            transition: transform 0.3s ease;
+        }
+
+        .hover-scale:hover {
+            transform: scale(1.03);
+        }
+
+        #spice-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        .bg-gradient-hero {
+
+            background-image:
+
+                url('https://wallpapercat.com/w/full/2/3/5/1318857-3840x2160-desktop-4k-chili-pepper-background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .menu-card {
+            transition: all 0.3s ease;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+
+        .scroll-reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .spice-marker {
+            position: relative;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .spice-marker::after {
+            content: '';
+            width: 100%;
+            height: 3px;
+            background-color: #FF3333;
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            transform: scaleX(0);
+            transform-origin: bottom right;
+            transition: transform 0.3s ease;
+        }
+
+        .spice-marker:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+
+        #three-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="bg-white text-gray-800 overflow-x-hidden">
+    <div id="three-bg"></div>
+
+    <!-- Loading Animation -->
+    <div id="loader" class="fixed top-0 left-0 w-full h-full bg-spice-800 flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="text-4xl font-bold text-white mb-4">KOCHCHI</div>
+            <div class="w-64 h-2 bg-gray-700 rounded-full overflow-hidden">
+                <div id="progress-bar" class="h-full bg-curry-400 rounded-full" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <header id="navbar" class="fixed w-full py-4 z-40 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <a href="#home" class="flex items-center space-x-2">
+                <div class="relative w-10 h-10">
+                    <div class="absolute inset-0 bg-spice-600 rounded-full opacity-70"></div>
+                    <div class="absolute inset-1 bg-curry-400 rounded-full flex items-center justify-center">
+                        <span class="text-spice-800 font-bold text-sm">K</span>
+                    </div>
+                </div>
+                <h1 class="text-2xl font-bold text-white">KOCHCHI</h1>
+            </a>
+
+            <!-- Desktop Menu -->
+            <nav class="hidden md:flex space-x-8">
+                <a href="#home"
+                    class="text-white hover:text-curry-300 transition-colors duration-300 font-medium">Home</a>
+                <a href="#about"
+                    class="text-white hover:text-curry-300 transition-colors duration-300 font-medium">Story</a>
+                <a href="#specialties"
+                    class="text-white hover:text-curry-300 transition-colors duration-300 font-medium">Specialties</a>
+                <a href="#menu"
+                    class="text-white hover:text-curry-300 transition-colors duration-300 font-medium">Menu</a>
+                <a href="#experience"
+                    class="text-white hover:text-curry-300 transition-colors duration-300 font-medium">Experience</a>
+                <a href="#contact"
+                    class="text-white hover:text-curry-300 transition-colors duration-300 font-medium">Contact</a>
+            </nav>
+
+            <!-- Mobile menu button -->
+            <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                    </path>
+                </svg>
+            </button>
+
+            <!-- Order Button -->
+            <a href="#order"
+                class="hidden md:block bg-curry-400 hover:bg-curry-500 text-spice-800 font-semibold py-2 px-4 rounded-full transition-all duration-300 transform hover:scale-105">
+                Order Now
+            </a>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-spice-800 py-4 px-6 shadow-lg">
+            <nav class="flex flex-col space-y-4">
+                <a href="#home" class="text-white hover:text-curry-300 transition-colors duration-300">Home</a>
+                <a href="#about" class="text-white hover:text-curry-300 transition-colors duration-300">Story</a>
+                <a href="#specialties"
+                    class="text-white hover:text-curry-300 transition-colors duration-300">Specialties</a>
+                <a href="#menu" class="text-white hover:text-curry-300 transition-colors duration-300">Menu</a>
+                <a href="#experience"
+                    class="text-white hover:text-curry-300 transition-colors duration-300">Experience</a>
+                <a href="#contact" class="text-white hover:text-curry-300 transition-colors duration-300">Contact</a>
+                <a href="#order" class="bg-curry-400 text-spice-800 font-semibold py-2 px-4 rounded-full text-center">
+                    Order Now
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="min-h-screen bg-gradient-hero flex items-center relative pt-20">
+        <div id="spice-canvas" class="absolute inset-0"></div>
+        <div class="max-w-7xl mx-auto px-6 py-20 relative z-10 w-full">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+                <div class="text-white">
+                    <div class="mb-4">
+                        <span
+                            class="inline-block px-4 py-1 bg-white bg-opacity-20 rounded-full text-sm font-medium">Since
+                            2010</span>
+                    </div>
+                    <h2 class="text-5xl md:text-6xl font-bold mb-6 leading-tight text-shadow">
+                        Experience <span class="text-curry-400">Authentic</span> Sri Lankan Flavors
+                    </h2>
+                    <p class="text-xl max-w-xl mb-8 text-gray-100">
+                        Where tradition meets culinary artistry. Dive into a world of aromatic spices, rich curries, and
+                        hearty dishes that tell the story of Sri Lanka's vibrant food culture.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="#menu"
+                            class="bg-curry-400 hover:bg-curry-500 text-spice-800 font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-curry-600 focus:ring-opacity-50">
+                            Explore Menu
+                        </a>
+                        <a href="#reservation"
+                            class="bg-transparent hover:bg-white hover:bg-opacity-10 text-white border-2 border-white font-bold py-3 px-8 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50">
+                            Reserve a Table
+                        </a>
+                    </div>
+                    <div class="mt-10 flex items-center space-x-6">
+                        <div class="flex -space-x-2">
+                            <div class="w-10 h-10 rounded-full bg-curry-100 flex items-center justify-center">
+                                <span class="text-curry-800 font-bold text-xs">4.9</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex text-curry-400 mb-1">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <p class="text-sm text-gray-200">Rated by over 200+ happy customers</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div
+                        class="relative w-full h-96 bg-curry-200 bg-opacity-25 rounded-3xl overflow-hidden flex items-center justify-center">
+                        <span class="text-6xl text-white"><img
+                                src="https://z-p3-scontent.fcmb7-1.fna.fbcdn.net/v/t39.30808-6/481184300_122109839858770703_6488104472730419551_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=102&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeHKd480gNmpCY-T_C6aqnMs8lyHPIa9tC7yXIc8hr20LsXYSz3NeFip9kRLhu09bf6Sg0jcY-HIloaEy7NitGpP&_nc_ohc=6sEgi0LyeRUQ7kNvwFS6g-l&_nc_oc=AdnuHr-9HmzY4YUA8Am5mJgPfKbv6pXInA4Bq99MekIrNXxj8zsDgHWTQAgPaoRb6j0&_nc_zt=23&_nc_ht=z-p3-scontent.fcmb7-1.fna&_nc_gid=w28KGcC_GHI9qQ1y9CVj5A&oh=00_AfFdrXxmaUzG78UbzbuBXpeA0_i4jtGzGxL2T_0NAFMj5Q&oe=67FD39CA"
+                                alt="Sri Lankan Dish" class="w-full h-full object-cover" /></span>
+                        <div class="absolute inset-0 border-4 border-dashed border-white border-opacity-20 rounded-3xl">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce">
+                <a href="#about" class="flex flex-col items-center">
+                    <span class="text-sm mb-2">Scroll Down</span>
+                    <i class="fas fa-chevron-down"></i>
+                </a>
+            </div>
+        </div>
+
+
+    </section>
+
+    <!-- Story Section -->
+    <section id="about" class="py-24 relative overflow-hidden bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                <div class="order-2 md:order-1">
+                    <div class="relative">
+                        <div
+                            class="w-full h-96 bg-spice-100 rounded-3xl flex items-center justify-center overflow-hidden">
+                            <div id="about-animation" class="w-full h-full"><img
+                                    src="https://z-p3-scontent.fcmb7-1.fna.fbcdn.net/v/t39.30808-6/481190844_122106240962770703_5795349583943723443_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=107&ccb=1-7&_nc_sid=cc71e4&_nc_eui2=AeGHnGo08mmPs2GQbeEUSsdx1x67rBEgBoHXHrusESAGgfrHZjQu--FhXnX_eF1tpUukmv7s-DNL9VJOn6RDGBjd&_nc_ohc=M7a7JgUvHdoQ7kNvwHGJQcF&_nc_oc=Adml1r9XJLN9-d2l91xCc218g-FPkaZNNFi2pnsZX3XPa8scygtJXqa6OeiydCv86fw&_nc_zt=23&_nc_ht=z-p3-scontent.fcmb7-1.fna&_nc_gid=g_GFpw348Z1eY8qL4P_eZg&oh=00_AfEbgiiODo96xPnk1yBY_ZuDiYM4-UuuqwCnQLtY4HGSQw&oe=67FD4F04"
+                                    alt="KOCHCHI Story" class="w-full h-full object-cover"></div>
+                        </div>
+                        <div
+                            class="absolute -bottom-6 -right-6 bg-curry-400 text-spice-800 px-6 py-4 rounded-xl shadow-lg">
+                            <p class="font-bold">Established in 2010</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="overflow-hidden rounded-lg shadow-md">
+                    <img src="https://z-p3-scontent.fcmb7-1.fna.fbcdn.net/v/t39.30808-6/481224908_122109839834770703_7300969514072786528_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=108&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeFaN_pAoAdm1cngAcWZ4fMfyF2MjR2-6WzIXYyNHb7pbKmm9fBJSHZgloM2niW0XmnnO4UCHNB-O-gUOL8YO6NU&_nc_ohc=3CSqK-qz3TgQ7kNvwFMdet0&_nc_oc=AdlVX_5QzWlx1HWdheFgcQu38gwDBEMlZcj21p9GzpmeeEEoO420wmxQBALvLSxJibA&_nc_zt=23&_nc_ht=z-p3-scontent.fcmb7-1.fna&_nc_gid=fME4DtnO6PyezkeKtO795w&oh=00_AfGh7iTmvWuCKld5l3G4g37CLUR8CXCTblxI2cc998DeRA&oe=67FD5105"
+                        alt="KOCHCHI Story" class="w-full h-full object-cover">
+                </div>
+                <div class="order-1 md:order-2">
+                    <div class="mb-2">
+                        <span
+                            class="inline-block px-3 py-1 bg-spice-100 text-spice-800 rounded-full text-sm font-medium">Our
+                            Story</span>
+                    </div>
+                    <h2 class="text-4xl font-bold mb-6 text-gray-800">The Passion Behind <span
+                            class="text-spice-600">KOCHCHI</span></h2>
+                    <p class="text-lg text-gray-600 mb-6 leading-relaxed">
+                        KOCHCHI began as a humble family endeavor, born from a deep love for Sri Lankan culinary
+                        traditions. Our founder, Chef Anura, grew up learning ancient recipes from his grandmother in
+                        the coastal town of Galle.
+                    </p>
+                    <p class="text-lg text-gray-600 mb-8 leading-relaxed">
+                        What started as a small food stall has blossomed into Polonnaruwa's premier destination for
+                        authentic Sri Lankan cuisine. Every dish tells a story – of heritage, of family, and of the rich
+                        tapestry of flavors that make Sri Lankan food so unique.
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+                        <div class="flex items-start">
+                            <div class="bg-curry-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-mortar-pestle text-curry-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-lg mb-1">Family Recipes</h3>
+                                <p class="text-gray-600">Handed down through generations</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-curry-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-pepper-hot text-curry-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-lg mb-1">Fresh Spices</h3>
+                                <p class="text-gray-600">Locally sourced for maximum flavor</p>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="#specialties"
+                        class="inline-flex items-center text-spice-600 font-semibold hover:text-spice-700 transition-colors duration-300">
+                        Discover our specialties
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Specialties Section -->
+    <section id="specialties" class="py-24 bg-gray-50 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-full opacity-5">
+            <div id="pattern-bg"></div>
+        </div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span
+                    class="inline-block px-3 py-1 bg-spice-100 text-spice-800 rounded-full text-sm font-medium mb-3">Chef's
+                    Selection</span>
+                <h2 class="text-4xl font-bold mb-6 text-gray-800">Our Signature <span
+                        class="text-spice-600">Specialties</span></h2>
+                <p class="text-lg text-gray-600">
+                    These beloved dishes showcase the heart of Sri Lankan cuisine, each one perfected over years of
+                    culinary dedication.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden hover-scale">
+                    <div class="h-48 bg-spice-100 flex items-center justify-center">
+                        <span class="text-6xl"><img src="https://i.ytimg.com/vi/vUYfSyUgwcc/maxresdefault.jpg"
+                                alt="ck"></span>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-xl font-bold">Chicken Kottu</h3>
+                            <div class="flex">
+                                <span class="text-curry-500">♨️</span>
+                                <span class="text-curry-500">♨️</span>
+                                <span class="text-curry-500">♨️</span>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 mb-4">
+                            Our signature dish features finely chopped rotti mixed with tender spiced chicken, fresh
+                            vegetables, and our secret blend of spices, stir-fried to perfection on a hot plate.
+                        </p>
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-xl text-spice-600">Rs. 850</span>
+                            <button
+                                class="bg-spice-100 hover:bg-spice-200 text-spice-800 px-4 py-2 rounded-full transition-colors duration-300">
+                                <i class="fas fa-plus mr-2"></i> Add to Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden hover-scale">
+                    <div class="h-48 bg-curry-100 flex items-center justify-center">
+                        <span class="text-6xl"><img
+                                src="https://i.ytimg.com/vi/apNx41pLM48/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCZi9hqm9tq0Tf694-eoyqA-1i5GQ"
+                                alt=""></span>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-xl font-bold">Jaffna Crab Curry</h3>
+                            <div class="flex">
+                                <span class="text-curry-500">♨️</span>
+                                <span class="text-curry-500">♨️</span>
+                                <span class="text-curry-500">♨️</span>
+                                <span class="text-curry-500">♨️</span>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 mb-4">
+                            Fresh lagoon crabs simmered in a rich, fiery curry with pandanus, curry leaves, and coconut
+                            milk. Served with steamed basmati rice and lime pickle.
+                        </p>
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-xl text-spice-600">Rs. 1600</span>
+                            <button
+                                class="bg-spice-100 hover:bg-spice-200 text-spice-800 px-4 py-2 rounded-full transition-colors duration-300">
+                                <i class="fas fa-plus mr-2"></i> Add to Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden hover-scale">
+                    <div class="h-48 bg-spice-100 flex items-center justify-center">
+                        <span class="text-6xl"><img
+                                src="https://i0.wp.com/berrychik.com/wp-content/uploads/2022/02/lamprais-recipes-1.jpg?resize=525%2C295&ssl=1"
+                                alt=""></span>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-xl font-bold">Veggie Lamprais</h3>
+                            <div class="flex">
+                                <span class="text-curry-500">
+                                    <span class="text-curry-500"><img
+                                            src="https://www.kugans.com/cdn/shop/articles/SRI_LANKANS_TRADITIONAL_LAMPRAIS_1024x1024.jpg?v=1629380219"
+                                            alt=""></span>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 mb-4">
+                            A vegetarian take on the Dutch-influenced classic. Fragrant rice with mixed vegetable
+                            curries, seeni sambol, and fried ash plantains, all wrapped in a banana leaf and baked.
+                        </p>
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-xl text-spice-600">Rs. 700</span>
+                            <button
+                                class="bg-spice-100 hover:bg-spice-200 text-spice-800 px-4 py-2 rounded-full transition-colors duration-300">
+                                <i class="fas fa-plus mr-2"></i> Add to Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-16 text-center">
+                <a href="#menu"
+                    class="inline-flex items-center justify-center bg-spice-600 hover:bg-spice-700 text-white font-semibold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105">
+                    View Full Menu
+                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+    <!-- Specialties Section -->
+    <section id="specialties" class="py-20 px-4 bg-yellow-50">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold text-center mb-10">Our Signature Dishes</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+                <!-- Chicken Kottu -->
+                <div class="bg-white p-4 rounded-xl shadow overflow-hidden">
+                    <div class="h-48 w-full overflow-hidden rounded-md">
+                        <img src="https://t4.ftcdn.net/jpg/11/51/09/19/360_F_1151091966_iIu4hbXSMUi8DEa6ZU8bDywFyUcQcemt.jpg"
+                            alt="Chicken Kottu" class="w-full h-full object-cover" alt="Chicken Kottu"
+                            class="w-full h-full object-cover">
+                    </div>
+                    <div class="mt-4 text-center">
+                        <h3 class="text-xl font-semibold mb-2">Chicken Kottu</h3>
+                        <p class="text-gray-700">Finely chopped rotti with spicy chicken & vegetables. <strong>Rs.
+                                850</strong></p>
+                    </div>
+                </div>
+
+                <!-- Jaffna Crab Curry -->
+                <div class="bg-white p-4 rounded-xl shadow overflow-hidden">
+                    <div class="h-48 w-full overflow-hidden rounded-md">
+                        <img src="https://i.ytimg.com/vi/NnJD4WL1Y-A/maxresdefault.jpg" alt="Jaffna Crab Curry"
+                            class="w-full h-full object-cover">
+                    </div>
+                    <div class="mt-4 text-center">
+                        <h3 class="text-xl font-semibold mb-2">Jaffna Crab Curry</h3>
+                        <p class="text-gray-700">Rich, fiery crab curry served with steamed rice. <strong>Rs.
+                                1600</strong>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Veggie Lamprais -->
+                <div class="bg-white p-4 rounded-xl shadow overflow-hidden">
+                    <div class="h-48 w-full overflow-hidden rounded-md">
+                        <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c" alt="Veggie Lamprais"
+                            class="w-full h-full object-cover">
+                    </div>
+                    <div class="mt-4 text-center">
+                        <h3 class="text-xl font-semibold mb-2">Veggie Lamprais</h3>
+                        <p class="text-gray-700">Rice, curry & sambols wrapped in banana leaf. <strong>Rs. 700</strong>
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Menu Section -->
+    <section id="menu" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span
+                    class="inline-block px-3 py-1 bg-curry-100 text-curry-800 rounded-full text-sm font-medium mb-3">Culinary
+                    Delights</span>
+                <h2 class="text-4xl font-bold mb-6 text-gray-800">Explore Our <span class="text-curry-500">Menu</span>
+                </h2>
+                <p class="text-lg text-gray-600">
+                    From fiery curries to comforting rice dishes, our menu showcases the diverse flavors of Sri Lankan
+                    cuisine.
+                </p>
+            </div>
+
+            <!-- Menu Categories -->
+            <div class="flex flex-wrap justify-center mb-12 gap-4">
+                <button
+                    class="menu-cat-btn active px-6 py-2 rounded-full bg-curry-500 text-white font-medium">All</button>
+                <button
+                    class="menu-cat-btn px-6 py-2 rounded-full bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 transition-colors duration-300">Starters</button>
+                <button
+                    class="menu-cat-btn px-6 py-2 rounded-full bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 transition-colors duration-300">Rice
+                    & Kottu</button>
+                <button
+                    class="menu-cat-btn px-6 py-2 rounded-full bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 transition-colors duration-300">Curries</button>
+                <button
+                    class="menu-cat-btn px-6 py-2 rounded-full bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 transition-colors duration-300">Seafood</button>
+                <button
+                    class="menu-cat-btn px-6 py-2 rounded-full bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 transition-colors duration-300">Vegetarian</button>
+                <button
+                    class="menu-cat-btn px-6 py-2 rounded-full bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 transition-colors duration-300">Desserts</button>
+                <button
+                    class="menu-cat-btn px-6 py-2 rounded-full bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 transition-colors duration-300">Beverages</button>
+            </div>
+
+            <!-- Menu Items -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Starters -->
+                <div class="menu-card bg-white border border-gray-100 rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-4 flex justify-between">
+                            <span>Mutton Rolls (2pcs)</span>
+                            <span class="text-spice-600">Rs. 450</span>
+                        </h3>
+                        <p class="text-gray-600 mb-4">
+                            Crispy crumb-coated rolls filled with spiced mutton and potatoes.
+                        </p>
+                        <div class="flex justify-between items-center">
+                            <div class="flex">
+                                <span class="text-curry-500"><img
+                                        src="data:image/jpeg;base64,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"
+                                        alt=""></span>
+                                <span class="text-curry-500">♨️</span>
+                            </div>
+                            <button
+                                class="bg-spice-100 hover:bg-spice-200 text-spice-800 px-4 py-2 rounded-full transition-colors duration-300 text-sm">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="menu-card bg-white border border-gray-100 rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-4 flex justify-between">
+                            <span>Isso Wade</span>
+                            <span class="text-spice-600">Rs. 380</span>
+                        </h3>
+                        <p class="text-gray-600 mb-4">
+                            Deep-fried lentil patties topped with shrimp and onions.
+                        </p>
+                        <div class="flex justify-between items-center">
+                            <div class="flex">
+                                <span class="text-curry-500"><img
+                                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnCMMII8a5an-eGXpayAhnF0GMkjKKGHgaNw&s"
+                                        alt=""></span>
+                                <span class="text-curry-500">♨️</span>
+                                <span class="text-curry-500">♨️</span>
+                            </div>
+                            <button
+                                class="bg-spice-100 hover:bg-spice-200 text-spice-800 px-4 py-2 rounded-full transition-colors duration-300 text-sm">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rice & Kottu -->
+                <div class="menu-card bg-white border border-gray-100 rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-4 flex justify-between">
+                            <span>Chicken Biryani</span>
+                            <span class="text-spice-600">Rs. 950</span>
+                        </h3>
+                        <p class="text-gray-600 mb-4">
+                            Fragrant basmati rice cooked with tender chicken, aromatic spices, and garnished with fried
+                            onions.
+                        </p>
+                        <div class="flex justify-between items-center">
+                            <div class="flex">
+                                <span class="text-curry-500"><img
+                                        src="data:image/jpeg;base64,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"
+                                        alt=""></span>
+                                <span class="text-curry-500">♨️</span>
+                            </div>
+                            <button
+                                class="bg-spice-100 hover:bg-spice-200 text-spice-800 px-4 py-2 rounded-full transition-colors duration-300 text-sm">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="menu-card bg-white border border-gray-100 rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-4 flex justify-between">
+                            <span>Egg Kottu</span>
+                            <span class="text-spice-600">Rs. 700</span>
+                        </h3>
+                        <p class="text-gray-600 mb-4">
+                            Chopped rotti mixed with eggs, vegetables, and spices, stir-fried to create a beloved street
+                            food classic.
+                        </p>
+                        <div class="flex justify-between items-center">
+                            <div class="flex">
+                                <span class="text-curry-500"><img
+                                        src="data:image/jpeg;base64,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"
+                                        alt=""></span>
+                                <span class="text-curry-500">♨️</span>
+                            </div>
+                            <button
+                                class="bg-spice-100 hover:bg-spice-200 text-spice-800 px-4 py-2 rounded-full transition-colors duration-300 text-sm">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Curries -->
+                <div class="menu-card bg-white border border-gray-100 rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-4 flex justify-between">
+                            <span>Black Pork Curry</span>
+                            <span class="text-spice-600">Rs. 1200</span>
+                        </h3>
+                        <p class="text-gray-600 mb-4">
+                            Slow-cooked pork in a rich, dark curry made with roasted spices, goraka, and coconut milk.
+                        </p>
+                        <div class="flex justify-between items-center">
+                            <div class="flex">
+                                <span class="text-curry-500"><img
+                                        src="data:image/jpeg;base64,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"
+                                        alt=""></span>
+                                <span class="text-curry-500">♨️</span>
+                                <span class="text-curry-500">♨️</span>
+                                <span class="text-curry-500">♨️</span>
+                            </div>
+                            <button
+                                class="bg-spice-100 hover:bg-spice-200 text-spice-800 px-4 py-2 rounded-full transition-colors duration-300 text-sm">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="menu-card bg-white border border-gray-100 rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-4 flex justify-between">
+                            <span>Mango Curry</span>
+                            <span class="text-spice-600">Rs. 550</span>
+                        </h3>
+                        <p class="text-gray-600 mb-4">
+                            Unripe mango cooked in a creamy coconut sauce with mustard seeds and turmeric.
+                        </p>
+                        <div class="flex justify-between items-center">
+                            <div class="flex">
+                                <span class="text-curry-500"><img
+                                        src="data:image/jpeg;base64,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"
+                                        alt=""></span>
+                            </div>
+                            <button
+                                class="bg-spice-100 hover:bg-spice-200 text-spice-800 px-4 py-2 rounded-full transition-colors duration-300 text-sm">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12 text-center">
+                <a href="#" id="view-full-menu" class="inline-block text-spice-600 hover:text-spice-700 font-semibold">
+                    View Complete Menu <i class="fas fa-angle-right ml-1"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dining Experience Section -->
+    <section id="experience" class="py-24 bg-gray-900 text-white relative overflow-hidden">
+        <div class="absolute inset-0 opacity-30">
+            <div id="experience-particles"></div>
+        </div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span
+                    class="inline-block px-3 py-1 bg-spice-800 text-spice-100 rounded-full text-sm font-medium mb-3">Dining
+                    Experience</span>
+                <h2 class="text-4xl font-bold mb-6">Immerse in the <span class="text-curry-400">Ambiance</span></h2>
+                <p class="text-lg text-gray-300">
+                    More than just a meal, KOCHCHI offers a complete sensory journey through Sri Lankan culture.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-gray-800 p-8 rounded-2xl hover:bg-gray-700 transition-colors duration-300">
+                    <div class="text-curry-400 text-4xl mb-6">
+                        <i class="fas fa-music"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Live Music</h3>
+                    <p class="text-gray-300">
+                        Every Friday and Saturday evening, enjoy traditional Sri Lankan music performed by local
+                        artists.
+                    </p>
+                </div>
+
+                <div class="bg-gray-800 p-8 rounded-2xl hover:bg-gray-700 transition-colors duration-300">
+                    <div class="text-curry-400 text-4xl mb-6">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Cooking Classes</h3>
+                    <p class="text-gray-300">
+                        Learn the secrets of Sri Lankan cuisine with our monthly cooking workshops led by our head chef.
+                    </p>
+                </div>
+
+                <div class="bg-gray-800 p-8 rounded-2xl hover:bg-gray-700 transition-colors duration-300">
+                    <div class="text-curry-400 text-4xl mb-6">
+                        <i class="fas fa-glass-cheers"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Private Events</h3>
+                    <p class="text-gray-300">
+                        Host your special occasions in our elegant private dining area with customized menus.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-16">
+                <div class="bg-black bg-opacity-30 p-8 rounded-2xl">
+                    <div class="flex flex-col md:flex-row items-center justify-between">
+                        <div class="mb-8 md:mb-0 md:mr-8">
+                            <h3 class="text-2xl font-bold mb-4">Join Our Food Festival</h3>
+                            <p class="text-gray-300 mb-4">
+                                Experience the grandest celebration of Sri Lankan cuisine at our annual food festival
+                                this July.
+                                Three days of flavors, music, and cultural performances.
+                            </p>
+                            <div class="flex flex-wrap gap-4">
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar-alt text-curry-400 mr-2"></i>
+                                    <span>July 15-17, 2025</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-map-marker-alt text-curry-400 mr-2"></i>
+                                    <span>Polonnaruwa Cultural Center</span>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="#contact"
+                            class="bg-curry-400 hover:bg-curry-500 text-gray-900 font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-curry-600 focus:ring-opacity-50">
+                            Register Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-24 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span
+                    class="inline-block px-3 py-1 bg-curry-100 text-curry-800 rounded-full text-sm font-medium mb-3">Customer
+                    Stories</span>
+                <h2 class="text-4xl font-bold mb-6 text-gray-800">What Our <span class="text-curry-500">Guests
+                        Say</span></h2>
+                <p class="text-lg text-gray-600">
+                    Don't just take our word for it – hear from our happy customers about their KOCHCHI experience.
+                </p>
+            </div>
+
+            <div class="relative">
+                <div class="testimonial-slider overflow-x-auto scrollbar-hide pb-8">
+                    <div class="flex gap-6 w-max">
+                        <div class="bg-white p-8 rounded-xl shadow-md w-80 flex-shrink-0">
+                            <div class="flex text-curry-400 mb-4">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <p class="text-gray-600 mb-6 italic">
+                                "The Jaffna crab curry was absolutely phenomenal! Perfectly spiced and reminded me of my
+                                grandmother's cooking. Will definitely be coming back!"
+                            </p>
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-user text-gray-400"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Priya Mendis</h4>
+                                    <p class="text-gray-500 text-sm">Local Resident</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-8 rounded-xl shadow-md w-80 flex-shrink-0">
+                            <div class="flex text-curry-400 mb-4">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <p class="text-gray-600 mb-6 italic">
+                                "As a tourist visiting Sri Lanka, KOCHCHI was the perfect introduction to authentic
+                                local cuisine. The staff were incredibly helpful in explaining each dish to us."
+                            </p>
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-user text-gray-400"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">James Wilson</h4>
+                                    <p class="text-gray-500 text-sm">Tourist from Australia</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-8 rounded-xl shadow-md w-80 flex-shrink-0">
+                            <div class="flex text-curry-400 mb-4">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <p class="text-gray-600 mb-6 italic">
+                                "The vegetarian lamprais exceeded my expectations. It's rare to find such flavorful
+                                vegetarian options that don't compromise on authentic taste. Highly recommend!"
+                            </p>
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-user text-gray-400"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Anushka Perera</h4>
+                                    <p class="text-gray-500 text-sm">Food Blogger</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-8 rounded-xl shadow-md w-80 flex-shrink-0">
+                            <div class="flex text-curry-400 mb-4">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <p class="text-gray-600 mb-6 italic">
+                                "We held our company dinner at KOCHCHI and it was a tremendous success. The private
+                                dining area, customized menu, and attentive service made it a memorable event."
+                            </p>
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-user text-gray-400"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Rohan De Silva</h4>
+                                    <p class="text-gray-500 text-sm">Business Owner</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute -bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                    <button class="w-3 h-3 rounded-full bg-curry-400"></button>
+                    <button class="w-3 h-3 rounded-full bg-gray-300"></button>
+                    <button class="w-3 h-3 rounded-full bg-gray-300"></button>
+                    <button class="w-3 h-3 rounded-full bg-gray-300"></button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reservation Section -->
+    <section id="reservation" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                <div>
+                    <span
+                        class="inline-block px-3 py-1 bg-spice-100 text-spice-800 rounded-full text-sm font-medium mb-3">Reserve
+                        A Table</span>
+                    <h2 class="text-4xl font-bold mb-6 text-gray-800">Make Your <span
+                            class="text-spice-600">Reservation</span></h2>
+                    <p class="text-lg text-gray-600 mb-8">
+                        Secure your table for a memorable dining experience at KOCHCHI. We recommend reservations,
+                        especially for weekend evenings.
+                    </p>
+
+                    <form id="reservation-form" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-gray-700 mb-2" for="name">Your Name</label>
+                                <input type="text" id="name" name="name"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-spice-500"
+                                    placeholder="John Doe" required />
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2" for="phone">Phone Number</label>
+                                <input type="tel" id="phone" name="phone"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-spice-500"
+                                    placeholder="+94 70 123 4567" required />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-gray-700 mb-2" for="date">Date</label>
+                                <input type="date" id="date" name="date"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-spice-500"
+                                    required />
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2" for="time">Time</label>
+                                <select id="time" name="time"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-spice-500"
+                                    required>
+                                    <option value="">Select Time</option>
+                                    <option value="12:00">12:00 PM</option>
+                                    <option value="13:00">1:00 PM</option>
+                                    <option value="14:00">2:00 PM</option>
+                                    <option value="19:00">7:00 PM</option>
+                                    <option value="20:00">8:00 PM</option>
+                                    <option value="21:00">9:00 PM</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 mb-2" for="guests">Number of Guests</label>
+                            <select id="guests" name="guests"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-spice-500"
+                                required>
+                                <option value="1">1 person</option>
+                                <option value="2" selected>2 people</option>
+                                <option value="3">3 people</option>
+                                <option value="4">4 people</option>
+                                <option value="5">5 people</option>
+                                <option value="6">6 people</option>
+                                <option value="7+">7+ people</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 mb-2" for="notes">Special Requests</label>
+                            <textarea id="notes" name="notes" rows="3"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-spice-500"
+                                placeholder="Any special requests or dietary requirements..."></textarea>
+                        </div>
+
+                        <button type="submit"
+                            class="w-full bg-spice-600 hover:bg-spice-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-spice-600 focus:ring-opacity-50">
+                            Confirm Reservation
+                        </button>
+                    </form>
+                </div>
+
+                <div class="hidden md:block">
+                    <div class="relative">
+                        <div class="w-full h-96 bg-gray-200 rounded-3xl overflow-hidden">
+                            <div id="reservation-animation" class="w-full h-full"></div>
+                        </div>
+                        <div
+                            class="absolute -bottom-6 -left-6 bg-curry-400 text-spice-800 px-6 py-4 rounded-xl shadow-lg">
+                            <p class="font-bold">Open 7 days a week</p>
+                            <p>12 PM - 10 PM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-24 bg-gray-900 text-white relative">
+        <div class="absolute inset-0 opacity-10">
+            <div id="contact-pattern"></div>
+        </div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-16">
+                <div>
+                    <span
+                        class="inline-block px-3 py-1 bg-spice-800 text-spice-100 rounded-full text-sm font-medium mb-3">Get
+                        In Touch</span>
+                    <h2 class="text-4xl font-bold mb-6">Contact <span class="text-curry-400">Us</span></h2>
+                    <p class="text-lg text-gray-300 mb-8">
+                        Have questions, feedback, or want to place an order? Reach out to us through any of these
+                        channels.
+                    </p>
+
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <div class="bg-gray-800 p-3 rounded-full mr-4">
+                                <i class="fas fa-map-marker-alt text-curry-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-lg mb-1">Location</h3>
+                                <p class="text-gray-300">Nishshankamallapura, Galthambarawa, Polonnaruwa, Sri Lanka</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start">
+                            <div class="bg-gray-800 p-3 rounded-full mr-4">
+                                <i class="fas fa-phone-alt text-curry-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-lg mb-1">Phone</h3>
+                                <p class="text-gray-300">+94 702 484 151</p>
+                                <p class="text-gray-300">+94 112 345 678</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start">
+                            <div class="bg-gray-800 p-3 rounded-full mr-4">
+                                <i class="fas fa-envelope text-curry-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-lg mb-1">Email</h3>
+                                <p class="text-gray-300">info@kochchi.lk</p>
+                                <p class="text-gray-300">reservations@kochchi.lk</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start">
+                            <div class="bg-gray-800 p-3 rounded-full mr-4">
+                                <i class="fas fa-clock text-curry-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-lg mb-1">Hours</h3>
+                                <p class="text-gray-300">Monday - Sunday: 12PM - 10PM</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-10">
+                        <h3 class="font-semibold text-lg mb-4">Follow Us</h3>
+                        <div class="flex space-x-4">
+                            <a href="#"
+                                class="bg-gray-800 hover:bg-gray-700 w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300">
+                                <i class="fab fa-facebook-f text-curry-400"></i>
+                            </a>
+                            <a href="#"
+                                class="bg-gray-800 hover:bg-gray-700 w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300">
+                                <i class="fab fa-instagram text-curry-400"></i>
+                            </a>
+                            <a href="#"
+                                class="bg-gray-800 hover:bg-gray-700 w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300">
+                                <i class="fab fa-twitter text-curry-400"></i>
+                            </a>
+                            <a href="#"
+                                class="bg-gray-800 hover:bg-gray-700 w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300">
+                                <i class="fab fa-tripadvisor text-curry-400"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="bg-gray-800 p-8 rounded-2xl shadow-xl">
+                        <h3 class="text-2xl font-bold mb-6">Send Us a Message</h3>
+                        <form id="contact-form" class="space-y-6">
+                            <div>
+                                <label class="block text-gray-300 mb-2" for="contact-name">Your Name</label>
+                                <input type="text" id="contact-name" name="contact-name"
+                                    class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-curry-400 text-white"
+                                    placeholder="John Doe" required />
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-300 mb-2" for="contact-email">Your Email</label>
+                                <input type="email" id="contact-email" name="contact-email"
+                                    class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-curry-400 text-white"
+                                    placeholder="john@example.com" required />
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-300 mb-2" for="contact-subject">Subject</label>
+                                <input type="text" id="contact-subject" name="contact-subject"
+                                    class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-curry-400 text-white"
+                                    placeholder="Reservation Inquiry" required />
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-300 mb-2" for="contact-message">Message</label>
+                                <textarea id="contact-message" name="contact-message" rows="4"
+                                    class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-curry-400 text-white"
+                                    placeholder="Your message here..." required></textarea>
+                            </div>
+
+                            <button type="submit"
+                                class="w-full bg-curry-400 hover:bg-curry-500 text-gray-900 font-bold py-3 px-8 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-curry-600 focus:ring-opacity-50">
+                                Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Order Online Section -->
+    <section id="order" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span
+                    class="inline-block px-3 py-1 bg-curry-100 text-curry-800 rounded-full text-sm font-medium mb-3">Order
+                    Online</span>
+                <h2 class="text-4xl font-bold mb-6 text-gray-800">Enjoy <span class="text-curry-500">KOCHCHI</span> at
+                    Home</h2>
+                <p class="text-lg text-gray-600">
+                    Can't make it to our restaurant? Order your favorite dishes for pickup or delivery.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <div class="bg-gray-50 p-8 rounded-2xl text-center hover:shadow-xl transition-shadow duration-300">
+                    <div class="w-16 h-16 bg-curry-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-mobile-alt text-2xl text-curry-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Mobile App</h3>
+                    <p class="text-gray-600 mb-6">
+                        Download our mobile app for iOS and Android to order with just a few taps.
+                    </p>
+                    <div class="flex justify-center space-x-4">
+                        <a href="#" class="bg-black text-white px-4 py-2 rounded-lg flex items-center">
+                            <i class="fab fa-apple mr-2"></i> App Store
+                        </a>
+                        <a href="#" class="bg-black text-white px-4 py-2 rounded-lg flex items-center">
+                            <i class="fab fa-google-play mr-2"></i> Play Store
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 p-8 rounded-2xl text-center hover:shadow-xl transition-shadow duration-300">
+                    <div class="w-16 h-16 bg-curry-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-phone-alt text-2xl text-curry-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Call Directly</h3>
+                    <p class="text-gray-600 mb-6">
+                        Place your order by phone for pickup or delivery within Polonnaruwa.
+                    </p>
+                    <a href="tel:+94702484151"
+                        class="bg-spice-600 hover:bg-spice-700 text-white px-6 py-2 rounded-lg inline-block">
+                        +94 702 484 151
+                    </a>
+                </div>
+
+                <div class="bg-gray-50 p-8 rounded-2xl text-center hover:shadow-xl transition-shadow duration-300">
+                    <div class="w-16 h-16 bg-curry-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-utensils text-2xl text-curry-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Food Delivery Apps</h3>
+                    <p class="text-gray-600 mb-6">
+                        Find us on your favorite food delivery platforms for convenient ordering.
+                    </p>
+                    <div class="flex justify-center space-x-4">
+                        <a href="#" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">PickMe
+                            Food</a>
+                        <a href="#" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">UberEats</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-100 rounded-3xl overflow-hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2">
+                    <div class="p-10 md:p-16">
+                        <h3 class="text-3xl font-bold mb-6">Special Offer!</h3>
+                        <p class="text-lg text-gray-600 mb-8">
+                            Get <span class="font-bold text-spice-600">15% off</span> your first online order with promo
+                            code:
+                        </p>
+                        <div class="bg-white border-2 border-dashed border-spice-500 rounded-lg p-4 mb-8 inline-block">
+                            <span class="text-2xl font-bold tracking-wider text-spice-600">KOCHCHI15</span>
+                        </div>
+                        <p class="text-gray-500 text-sm">
+                            *Valid for first-time online orders only. Minimum order value Rs. 1500.
+                        </p>
+                    </div>
+                    <div class="bg-spice-100 p-10 md:p-16 flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="name" class="block text-gray-700 font-medium mb-2">Your Name</label>
+                                    <input type="text" id="name"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-spice-500 focus:border-spice-500 transition-colors duration-300"
+                                        placeholder="John Doe">
+                                </div>
+                                <div>
+                                    <label for="email" class="block text-gray-700 font-medium mb-2">Email
+                                        Address</label>
+                                    <input type="email" id="email"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-spice-500 focus:border-spice-500 transition-colors duration-300"
+                                        placeholder="john@example.com">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="date" class="block text-gray-700 font-medium mb-2">Date</label>
+                                    <input type="date" id="date"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-spice-500 focus:border-spice-500 transition-colors duration-300">
+                                </div>
+                                <div>
+                                    <label for="time" class="block text-gray-700 font-medium mb-2">Time</label>
+                                    <select id="time"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-spice-500 focus:border-spice-500 transition-colors duration-300">
+                                        <option value="" disabled selected>Select time</option>
+                                        <option value="lunch">12:00 PM - Lunch</option>
+                                        <option value="afternoon">3:00 PM - Afternoon</option>
+                                        <option value="dinner">7:00 PM - Dinner</option>
+                                        <option value="late">9:00 PM - Late Dinner</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="guests" class="block text-gray-700 font-medium mb-2">Number of
+                                    Guests</label>
+                                <select id="guests"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-spice-500 focus:border-spice-500 transition-colors duration-300">
+                                    <option value="" disabled selected>Select guests</option>
+                                    <option value="1">1 Person</option>
+                                    <option value="2">2 People</option>
+                                    <option value="3-4">3-4 People</option>
+                                    <option value="5-6">5-6 People</option>
+                                    <option value="7-8">7-8 People</option>
+                                    <option value="9+">9+ People (Large Group)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="special" class="block text-gray-700 font-medium mb-2">Special
+                                    Requests</label>
+                                <textarea id="special" rows="3"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-spice-500 focus:border-spice-500 transition-colors duration-300"
+                                    placeholder="Any dietary restrictions or special occasions?"></textarea>
+                            </div>
+
+                            <button type="submit"
+                                class="bg-spice-600 hover:bg-spice-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 w-full">
+                                Reserve Now
+                            </button>
+                            </form>
+                        </div>
+
+                        <div class="hidden md:block">
+                            <div class="relative">
+                                <div class="bg-gray-100 rounded-3xl h-96 overflow-hidden">
+                                    <div id="reservation-animation" class="w-full h-full"></div>
+                                </div>
+                                <div class="absolute -bottom-6 -left-6 bg-white p-6 rounded-xl shadow-xl">
+                                    <h3 class="font-bold text-lg mb-2 text-spice-600">Opening Hours</h3>
+                                    <ul class="space-y-2 text-gray-600">
+                                        <li class="flex justify-between">
+                                            <span>Monday - Friday</span>
+                                            <span>11:00 AM - 10:00 PM</span>
+                                        </li>
+                                        <li class="flex justify-between">
+                                            <span>Saturday</span>
+                                            <span>10:00 AM - 11:00 PM</span>
+                                        </li>
+                                        <li class="flex justify-between">
+                                            <span>Sunday</span>
+                                            <span>10:00 AM - 9:00 PM</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    </section>
+
+    <!-- Order Online Section -->
+    <section id="order" class="py-24 bg-spice-800 text-white relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-full opacity-10">
+            <div id="order-pattern"></div>
+        </div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span
+                    class="inline-block px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm font-medium mb-3">Delivery
+                    & Takeaway</span>
+                <h2 class="text-4xl font-bold mb-6">Order <span class="text-curry-400">Sri Lankan Flavors</span> To Your
+                    Door</h2>
+                <p class="text-lg text-gray-200 mb-8">
+                    Can't dine in? Bring the authentic taste of Sri Lanka to your home with our delivery and takeaway
+                    options.
+                </p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="#"
+                        class="bg-white text-spice-800 font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 flex items-center">
+                        <i class="fas fa-utensils mr-2"></i> Order for Pickup
+                    </a>
+                    <a href="#"
+                        class="bg-curry-400 text-spice-800 font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 flex items-center">
+                        <i class="fas fa-motorcycle mr-2"></i> Order Delivery
+                    </a>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div
+                    class="bg-white bg-opacity-5 backdrop-blur-sm rounded-xl p-8 text-center hover:bg-opacity-10 transition-all duration-300">
+                    <div class="text-curry-400 text-3xl mb-4">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Our Mobile App</h3>
+                    <p class="text-gray-300 mb-6">
+                        Download our mobile app for the fastest ordering experience, exclusive deals, and order
+                        tracking.
+                    </p>
+                    <div class="flex justify-center space-x-4">
+                        <a href="#"
+                            class="bg-black bg-opacity-80 text-white px-4 py-2 rounded-lg flex items-center hover:bg-opacity-100 transition-colors duration-300">
+                            <i class="fab fa-apple text-xl mr-2"></i>
+                            <div class="text-left">
+                                <div class="text-xs">Download on the</div>
+                                <div class="font-bold">App Store</div>
+                            </div>
+                        </a>
+                        <a href="#"
+                            class="bg-black bg-opacity-80 text-white px-4 py-2 rounded-lg flex items-center hover:bg-opacity-100 transition-colors duration-300">
+                            <i class="fab fa-google-play text-xl mr-2"></i>
+                            <div class="text-left">
+                                <div class="text-xs">Get it on</div>
+                                <div class="font-bold">Google Play</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white bg-opacity-5 backdrop-blur-sm rounded-xl p-8 text-center hover:bg-opacity-10 transition-all duration-300">
+                    <div class="text-curry-400 text-3xl mb-4">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Special Meal Kits</h3>
+                    <p class="text-gray-300 mb-6">
+                        Try our meal kits with pre-measured ingredients and step-by-step recipes to cook Sri Lankan
+                        dishes at home.
+                    </p>
+                    <a href="#"
+                        class="inline-flex items-center bg-white text-spice-800 font-semibold py-2 px-4 rounded-full hover:bg-curry-400 transition-colors duration-300">
+                        Explore Kits <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+
+                <div
+                    class="bg-white bg-opacity-5 backdrop-blur-sm rounded-xl p-8 text-center hover:bg-opacity-10 transition-all duration-300">
+                    <div class="text-curry-400 text-3xl mb-4">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Catering Services</h3>
+                    <p class="text-gray-300 mb-6">
+                        From small gatherings to large events, our catering team brings the authentic flavors of Sri
+                        Lanka to your special occasions.
+                    </p>
+                    <a href="#"
+                        class="inline-flex items-center bg-white text-spice-800 font-semibold py-2 px-4 rounded-full hover:bg-curry-400 transition-colors duration-300">
+                        Request Quote <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="mt-16 text-center">
+                <p class="text-gray-300 mb-4">Available on popular delivery platforms</p>
+                <div class="flex justify-center space-x-8">
+                    <a href="#" class="opacity-70 hover:opacity-100 transition-opacity duration-300"
+                        aria-label="UberEats">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm6.223 17.101c-.5.77-1.403 1.243-2.35 1.243-.947 0-1.85-.473-2.35-1.243L9.177 10.9h2.177l3.354 5.089c.18.273.487.437.817.437s.636-.164.817-.437L19.693 10.9h2.106l-3.576 6.201z" />
+                        </svg>
+                    </a>
+                    <a href="#" class="opacity-70 hover:opacity-100 transition-opacity duration-300"
+                        aria-label="DoorDash">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M23.071 8.409L19.7 4.546l-3.847 3.356-3.847-3.356-3.371 3.863 3.847 3.356-3.847 3.356 3.371 3.863 3.847-3.356 3.847 3.356 3.371-3.863-3.847-3.356 3.847-3.356z" />
+                        </svg>
+                    </a>
+                    <a href="#" class="opacity-70 hover:opacity-100 transition-opacity duration-300"
+                        aria-label="GrubHub">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M14.982 11.256l-2.437-6.77c-.953.31-1.52.328-2.437 0l-2.224 6.77h7.098zM4.324 13.2c-.56 0-1.015.455-1.015 1.015 0 .56.455 1.015 1.015 1.015.56 0 1.015-.455 1.015-1.015 0-.56-.455-1.015-1.015-1.015zm15.353-.02c-.56 0-1.015.455-1.015 1.015 0 .56.455 1.015 1.015 1.015.56 0 1.015-.455 1.015-1.015 0-.56-.455-1.015-1.015-1.015zM12 15.271c-.56 0-1.015.455-1.015 1.015 0 .56.455 1.015 1.015 1.015.56 0 1.015-.455 1.015-1.015 0-.56-.455-1.015-1.015-1.015zm0-2.071c-.56 0-1.015.455-1.015 1.015 0 .56.455 1.015 1.015 1.015.56 0 1.015-.455 1.015-1.015 0-.56-.455-1.015-1.015-1.015zm7.09-9.9L12 0 4.91 3.3 0 12l4.91 8.7L12 24l7.09-3.3L24 12l-4.91-8.7z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-24 bg-white relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                <div>
+                    <div class="mb-2">
+                        <span
+                            class="inline-block px-3 py-1 bg-spice-100 text-spice-800 rounded-full text-sm font-medium">Contact
+                            Us</span>
+                    </div>
+                    <h2 class="text-4xl font-bold mb-6 text-gray-800">Get in <span class="text-spice-600">Touch</span>
+                    </h2>
+                    <p class="text-lg text-gray-600 mb-8">
+                        Have questions, feedback, or want to learn more about our offerings? We'd love to hear from you.
+                    </p>
+
+                    <div class="space-y-6 mb-8">
+                        <div class="flex items-start">
+                            <div class="bg-spice-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-map-marker-alt text-spice-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-lg mb-1">Location</h3>
+                                <p class="text-gray-600">
+                                    42 Sacred City Road, Polonnaruwa<br>
+                                    North Central Province, Sri Lanka
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start">
+                            <div class="bg-spice-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-phone-alt text-spice-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-lg mb-1">Phone</h3>
+                                <p class="text-gray-600">
+                                    +94 71 555 1234<br>
+                                    +94 77 123 4567
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start">
+                            <div class="bg-spice-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-envelope text-spice-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-lg mb-1">Email</h3>
+                                <p class="text-gray-600">
+                                    info@kochchirestaurant.com<br>
+                                    bookings@kochchirestaurant.com
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-4">
+                        <a href="#"
+                            class="bg-gray-100 hover:bg-gray-200 w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 text-spice-600">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#"
+                            class="bg-gray-100 hover:bg-gray-200 w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 text-spice-600">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#"
+                            class="bg-gray-100 hover:bg-gray-200 w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 text-spice-600">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#"
+                            class="bg-gray-100 hover:bg-gray-200 w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 text-spice-600">
+                            <i class="fab fa-tripadvisor"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="bg-gray-50 p-8 rounded-xl shadow-lg">
+                        <h3 class="text-2xl font-bold mb-6">Send us a Message</h3>
+                        <form class="space-y-6">
+                            <div>
+                                <label for="contact-name" class="block text-gray-700 font-medium mb-2">Your Name</label>
+                                <input type="text" id="contact-name"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-spice-500 focus:border-spice-500 transition-colors duration-300"
+                                    placeholder="Your name">
+                            </div>
+
+                            <div>
+                                <label for="contact-email" class="block text-gray-700 font-medium mb-2">Email
+                                    Address</label>
+                                <input type="email" id="contact-email"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-spice-500 focus:border-spice-500 transition-colors duration-300"
+                                    placeholder="Your email">
+                            </div>
+
+                            <div>
+                                <label for="contact-subject"
+                                    class="block text-gray-700 font-medium mb-2">Subject</label>
+                                <input type="text" id="contact-subject"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-spice-500 focus:border-spice-500 transition-colors duration-300"
+                                    placeholder="Your subject">
+                            </div>
+
+                            <div>
+                                <label for="contact-message"
+                                    class="block text-gray-700 font-medium mb-2">Message</label>
+                                <textarea id="contact-message" rows="4"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-spice-500 focus:border-spice-500 transition-colors duration-300"
+                                    placeholder="Your message"></textarea>
+                            </div>
+
+                            <button type="submit"
+                                class="bg-spice-600 hover:bg-spice-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 w-full">
+                                Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="h-96 bg-gray-200 relative overflow-hidden">
+        <div id="map-placeholder" class="w-full h-full">
+            <!-- Map placeholder - would be replaced with actual map integration -->
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div class="text-center">
+                    <i class="fas fa-map-marked-alt text-6xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-500">Interactive map loading...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="py-20 bg-curry-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="bg-white rounded-2xl shadow-xl p-8 md:p-12">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="text-3xl font-bold mb-4 text-gray-800">Join Our <span class="text-spice-600">Spice
+                                Club</span></h3>
+                        <p class="text-gray-600 mb-6">
+                            Subscribe to our newsletter for exclusive recipes, special offers, and upcoming events. Be
+                            the first to know about seasonal specials and cultural celebrations.
+                        </p>
+                        <div class="flex flex-col sm:flex-row">
+                            <input type="email" placeholder="Your email address"
+                                class="flex-grow px-4 py-3 rounded-l-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-spice-500 focus:border-spice-500 mb-2 sm:mb-0">
+                            <button
+                                class="bg-spice-600 hover:bg-spice-700 text-white font-medium py-3 px-6 rounded-r-lg transition-colors duration-300">
+                                Subscribe
+                            </button>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-4">
+                            By subscribing, you agree to receive marketing emails from KOCHCHI. Don't worry, we respect
+                            your privacy and will never share your information.
+                        </p>
+                    </div>
+                    <div class="hidden md:block">
+                        <div class="relative">
+                            <div class="bg-curry-100 h-64 rounded-xl overflow-hidden">
+                                <div id="newsletter-animation" class="w-full h-full"></div>
+                            </div>
+                            <div class="absolute -bottom-4 -right-4 bg-white p-4 rounded-lg shadow-lg">
+                                <i class="fas fa-gift text-3xl text-curry-500"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-spice-900 text-white py-16">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                <div>
+                    <div class="flex items-center space-x-2 mb-6">
+                        <div class="relative w-10 h-10">
+                            <div class="absolute inset-0 bg-curry-400 rounded-full"></div>
+                            <div class="absolute inset-1 bg-spice-800 rounded-full flex items-center justify-center">
+                                <span class="text-curry-400 font-bold text-sm">K</span>
+                            </div>
+                        </div>
+                        <h1 class="text-2xl font-bold">KOCHCHI</h1>
+                    </div>
+                    <p class="text-gray-400 mb-6">
+                        Authentic Sri Lankan cuisine crafted with passion and tradition. Bringing the vibrant flavors of
+                        Sri Lanka to every dish since 2010.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#"
+                            class="bg-spice-800 hover:bg-spice-700 w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#"
+                            class="bg-spice-800 hover:bg-spice-700 w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#"
+                            class="bg-spice-800 hover:bg-spice-700 w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-bold mb-6">Quick Links</h3>
+                    <ul class="space-y-4">
+                        <li><a href="#home"
+                                class="text-gray-400 hover:text-white transition-colors duration-300">Home</a></li>
+                        <li><a href="#about" class="text-gray-400 hover:text-white transition-colors duration-300">Our
+                                Story</a></li>
+                        <li><a href="#menu"
+                                class="text-gray-400 hover:text-white transition-colors duration-300">Menu</a></li>
+                        <li><a href="#gallery"
+                                class="text-gray-400 hover:text-white transition-colors duration-300">Gallery</a></li>
+                        <li><a href="#experience"
+                                class="text-gray-400 hover:text-white transition-colors duration-300">Experience</a>
+                        </li>
+                        <li><a href="#reservation"
+                                class="text-gray-400 hover:text-white transition-colors duration-300">Reservations</a>
+                        </li>
+                        <li><a href="#contact"
+                                class="text-gray-400 hover:text-white transition-colors duration-300">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-bold mb-6">Opening Hours</h3>
+                    <ul class="space-y-4 text-gray-400">
+                        <li class="flex justify-between">
+                            <span>Monday - Friday</span>
+                            <span>11:00 AM - 10:00 PM</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span>Saturday</span>
+                            <span>10:00 AM - 11:00 PM</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span>Sunday</span>
+                            <span>10:00 AM - 9:00 PM</span>
+                        </li>
+                    </ul>
+                    <p class="text-curry-400 mt-4 font-medium">
+                        * Last order 30 minutes before closing
+                    </p>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-bold mb-6">Contact</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt text-curry-400 mt-1 mr-3"></i>
+                            <span class="text-gray-400">42 Sacred City Road, Polonnaruwa, Sri Lanka</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-phone-alt text-curry-400 mt-1 mr-3"></i>
+                            <span class="text-gray-400">+94 71 555 1234</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-envelope text-curry-400 mt-1 mr-3"></i>
+                            <span class="text-gray-400">info@kochchirestaurant.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-12 pt-8 border-t border-spice-800 text-center text-gray-500 text-sm">
+                <p>© 2025 KOCHCHI Restaurant. All rights reserved.</p>
+                <div class="flex justify-center space-x-6 mt-4">
+                    <a href="#" class="hover:text-gray-300 transition-colors duration-300">Privacy Policy</a>
+                    <a href="#" class="hover:text-gray-300 transition-colors duration-300">Terms of Service</a>
+                    <a href="#" class="hover:text-gray-300 transition-colors duration-300">Sitemap</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Loader Animation
+        window.addEventListener('load', function () {
+            const loader = document.getElementById('loader');
+            const progressBar = document.getElementById('progress-bar');
+            let width = 0;
+            const interval = setInterval(function () {
+                if (width >= 100) {
+                    clearInterval(interval);
+                    setTimeout(function () {
+                        loader.classList.add('opacity-0');
+                        setTimeout(function () {
+                            loader.style.display = 'none';
+                        }, 500);
+                    }, 500);
+                } else {
+                    width += 5;
+                    progressBar.style.width = width + '%';
+                }
+            }, 50);
+        });
+
+        // Mobile Menu Toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function () {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Navbar Scroll Effect
+        window.addEventListener('scroll', function () {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('bg-spice-800', 'shadow-md');
+            } else {
+                navbar.classList.remove('bg-spice-800', 'shadow-md');
+            }
+        });
+
+        // Hero Animation
+        const heroAnimation = new p5(function (p) {
+            let particles = [];
+            const numParticles = 50;
+
+            p.setup = function () {
+                const canvas = p.createCanvas(p.windowWidth, p.windowHeight);
+                canvas.parent('hero-animation');
+
+                for (let i = 0; i < numParticles; i++) {
+                    particles.push({
+                        position: p.createVector(p.random(p.width), p.random(p.height)),
+                        size: p.random(5, 15),
+                        speed: p.random(0.5, 2),
+                        color: p.color(p.random(200, 255), p.random(150, 200), p.random(50, 100), p.random(100, 150))
+                    });
+                }
+            };
+
+            p.draw = function () {
+                p.clear();
+
+                for (let i = 0; i < particles.length; i++) {
+                    const particle = particles[i];
+
+                    p.noStroke();
+                    p.fill(particle.color);
+                    p.circle(particle.position.x, particle.position.y, particle.size);
+
+                    particle.position.y += particle.speed;
+
+                    if (particle.position.y > p.height + particle.size) {
+                        particle.position.y = -particle.size;
+                        particle.position.x = p.random(p.width);
+                    }
+                }
+            };
+
+            p.windowResized = function () {
+                p.resizeCanvas(p.windowWidth, p.windowHeight);
+            };
+        }, 'hero-animation');
+
+        // About Animation
+        const aboutAnimation = new p5(function (p) {
+            let particles = [];
+            const numParticles = 30;
+
+            p.setup = function () {
+                const canvas = p.createCanvas(400, 300);
+                canvas.parent('about-animation');
+
+                for (let i = 0; i < numParticles; i++) {
+                    particles.push({
+                        position: p.createVector(p.random(p.width), p.random(p.height)),
+                        size: p.random(3, 10),
+                        speed: p.random(0.3, 1),
+                        color: p.color(p.random(180, 220), p.random(80, 120), p.random(40, 80), p.random(100, 150))
+                    });
+                }
+            };
+
+            p.draw = function () {
+                p.clear();
+
+                for (let i = 0; i < particles.length; i++) {
+                    const particle = particles[i];
+
+                    p.noStroke();
+                    p.fill(particle.color);
+                    p.circle(particle.position.x, particle.position.y, particle.size);
+
+                    particle.position.x += Math.cos(p.frameCount * 0.05 + i) * particle.speed;
+                    particle.position.y += Math.sin(p.frameCount * 0.05 + i) * particle.speed;
+
+                    if (particle.position.x < 0) particle.position.x = p.width;
+                    if (particle.position.x > p.width) particle.position.x = 0;
+                    if (particle.position.y < 0) particle.position.y = p.height;
+                    if (particle.position.y > p.height) particle.position.y = 0;
+                }
+            };
+        }, 'about-animation');
+
+        // Reservation Animation
+        const reservationAnimation = new p5(function (p) {
+            let dots = [];
+            const numDots = 40;
+
+            p.setup = function () {
+                const canvas = p.createCanvas(400, 400);
+                canvas.parent('reservation-animation');
+
+                for (let i = 0; i < numDots; i++) {
+                    dots.push({
+                        position: p.createVector(p.random(p.width), p.random(p.height)),
+                        size: p.random(2, 6),
+                        color: p.color(p.random(140, 200), p.random(50, 100), p.random(20, 60), p.random(150, 200))
+                    });
+                }
+            };
+
+            p.draw = function () {
+                p.background(240, 240, 245);
+
+                // Draw connections between dots
+                p.stroke(180, 180, 200, 100);
+                p.strokeWeight(0.5);
+                for (let i = 0; i < dots.length; i++) {
+                    for (let j = i + 1; j < dots.length; j++) {
+                        const d = p.dist(dots[i].position.x, dots[i].position.y, dots[j].position.x, dots[j].position.y);
+                        if (d < 80) {
+                            p.line(dots[i].position.x, dots[i].position.y, dots[j].position.x, dots[j].position.y);
+                        }
+                    }
+                }
+
+                // Draw dots
+                for (let i = 0; i < dots.length; i++) {
+                    const dot = dots[i];
+
+                    p.noStroke();
+                    p.fill(dot.color);
+                    p.circle(dot.position.x, dot.position.y, dot.size);
+
+                    // Move dots with perlin noise
+                    dot.position.x += p.map(p.noise(i * 0.5, p.frameCount * 0.01), 0, 1, -1, 1);
+                    dot.position.y += p.map(p.noise(i * 0.5 + 100, p.frameCount * 0.01), 0, 1, -1, 1);
+
+                    // Keep dots on canvas
+                    if (dot.position.x < 0) dot.position.x = p.width;
+                    if (dot.position.x > p.width) dot.position.x = 0;
+                    if (dot.position.y < 0) dot.position.y = p.height;
+                    if (dot.position.y > p.height) dot.position.y = 0;
+                }
+            };
+        }, 'reservation-animation');
+
+        // Order Pattern
+        const orderPattern = new p5(function (p) {
+            p.setup = function () {
+                const canvas = p.createCanvas(p.windowWidth, p.windowHeight);
+                canvas.parent('order-pattern');
+                p.noLoop();
+            };
+
+            p.draw = function () {
+                p.background(255, 255, 255, 0);
+                p.noFill();
+                p.stroke(255, 255, 255, 20);
+                p.strokeWeight(1);
+
+                // Draw a pattern of spice-inspired shapes
+                for (let y = -100; y < p.height + 100; y += 80) {
+                    for (let x = -100; x < p.width + 100; x += 80) {
+                        const size = p.random(30, 50);
+                        const type = p.floor(p.random(4));
+
+                        p.push();
+                        p.translate(x, y);
+                        p.rotate(p.random(p.TWO_PI));
+
+                        switch (type) {
+                            case 0: // Circle with dots
+                                p.circle(0, 0, size);
+                                p.fill(255, 255, 255, 10);
+                                p.circle(0, 0, size * 0.5);
+                                break;
+                            case 1: // Star
+                                p.beginShape();
+                                for (let i = 0; i < 10; i++) {
+                                    const radius = i % 2 === 0 ? size / 2 : size / 4;
+                                    const angle = p.TWO_PI * i / 10 - p.HALF_PI;
+                                    p.vertex(radius * p.cos(angle), radius * p.sin(angle));
+                                }
+                                p.endShape(p.CLOSE);
+                                break;
+                            case 2: // Flower
+                                for (let i = 0; i < 6; i++) {
+                                    const angle = p.TWO_PI * i / 6;
+                                    p.ellipse(size / 3 * p.cos(angle), size / 3 * p.sin(angle), size / 2, size / 3);
+                                }
+                                break;
+                            case 3: // Leaf
+                                p.beginShape();
+                                for (let i = 0; i < p.TWO_PI; i += 0.1) {
+                                    const r = size / 2 * p.sin(i * 3);
+                                    p.vertex(r * p.cos(i), r * p.sin(i));
+                                }
+                                p.endShape(p.CLOSE);
+                                break;
+                        }
+                        p.pop();
+                    }
+                }
+            };
+
+            p.windowResized = function () {
+                p.resizeCanvas(p.windowWidth, p.windowHeight);
+                p.redraw();
+            };
+        }, 'order-pattern');
+
+        // Newsletter Animation
+        const newsletterAnimation = new p5(function (p) {
+            let emitters = [];
+
+            p.setup = function () {
+                const canvas = p.createCanvas(400, 300);
+                canvas.parent('newsletter-animation');
+
+                // Create spice particle emitters
+                emitters.push(new Emitter(p.width / 2, p.height / 2, p.color(220, 150, 50)));
+                emitters.push(new Emitter(p.width / 3, p.height / 3, p.color(180, 90, 40)));
+                emitters.push(new Emitter(2 * p.width / 3, 2 * p.height / 3, p.color(200, 120, 30)));
+            };
+
+            p.draw = function () {
+                p.background(248, 245, 230);
+
+                for (let emitter of emitters) {
+                    emitter.update();
+                    emitter.display();
+                }
+            };
+
+            // Particle system
+            function Particle(x, y, color) {
+                this.position = p.createVector(x, y);
+                this.velocity = p.createVector(p.random(-1, 1), p.random(-1, 1));
+                this.acceleration = p.createVector(0, 0);
+                this.lifespan = 255;
+                this.color = color;
+                this.size = p.random(3, 8);
+
+                this.update = function () {
+                    this.velocity.add(this.acceleration);
+                    this.position.add(this.velocity);
+                    this.acceleration.mult(0);
+                    this.lifespan -= 2;
+                };
+
+                this.display = function () {
+                    p.noStroke();
+                    const c = p.color(p.red(this.color), p.green(this.color), p.blue(this.color), this.lifespan);
+                    p.fill(c);
+                    p.circle(this.position.x, this.position.y, this.size);
+                };
+
+                this.isDead = function () {
+                    return this.lifespan <= 0;
+                };
+            }
+
+            function Emitter(x, y, color) {
+                this.position = p.createVector(x, y);
+                this.particles = [];
+                this.color = color;
+
+                this.update = function () {
+                    // Add new particles
+                    if (p.frameCount % 5 === 0) {
+                        this.particles.push(new Particle(this.position.x + p.random(-10, 10),
+                            this.position.y + p.random(-10, 10),
+                            this.color));
+                    }
+
+                    // Update and remove dead particles
+                    for (let i = this.particles.length - 1; i >= 0; i--) {
+                        this.particles[i].update();
+                        if (this.particles[i].isDead()) {
+                            this.particles.splice(i, 1);
+                        }
+                    }
+                };
+
+                this.display = function () {
+                    for (let particle of this.particles) {
+                        particle.display();
+                    }
+                };
+            }
+        }, 'newsletter-animation');
+
+        // Map Placeholder
+        document.getElementById('map-placeholder').addEventListener('click', function () {
+            alert('This would connect to a real map service in production.');
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80, // Adjust for header height
+                        behavior: 'smooth'
+                    });
+
+                    // Close mobile menu if open
+                    const mobileMenu = document.getElementById('mobile-menu');
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                }
+            });
+        });
+
+        // Form validation
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                alert('Form submission would be processed in production. Thank you!');
+            });
+        });
+
+        // Initialize animations for menu items
+        document.addEventListener('DOMContentLoaded', function () {
+            const menuItems = document.querySelectorAll('.menu-item');
+            if (menuItems.length > 0) {
+                menuItems.forEach((item, index) => {
+                    setTimeout(() => {
+                        item.classList.add('opacity-100', 'translate-y-0');
+                    }, 100 * index);
+                });
+            }
+        });
+
+        // Testimonial slider (if present)
+        const testimonialSlider = {
+            currentSlide: 0,
+            slides: document.querySelectorAll('.testimonial-slide'),
+
+            init: function () {
+                if (this.slides.length === 0) return;
+
+                this.showSlide(this.currentSlide);
+
+                document.querySelector('.testimonial-next').addEventListener('click', () => {
+                    this.nextSlide();
+                });
+
+                document.querySelector('.testimonial-prev').addEventListener('click', () => {
+                    this.prevSlide();
+                });
+
+                // Auto-advance
+                setInterval(() => {
+                    this.nextSlide();
+                }, 8000);
+            },
+
+            showSlide: function (index) {
+                this.slides.forEach(slide => {
+                    slide.style.display = 'none';
+                });
+                this.slides[index].style.display = 'block';
+            },
+
+            nextSlide: function () {
+                this.currentSlide = (this.currentSlide + 1) % this.slides.length;
+                this.showSlide(this.currentSlide);
+            },
+
+            prevSlide: function () {
+                this.currentSlide = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
+                this.showSlide(this.currentSlide);
+            }
+        };
+
+        // Initialize testimonial slider if elements exist
+        if (document.querySelector('.testimonial-slide')) {
+            testimonialSlider.init();
+
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const loader = document.getElementById('loader');
+            if (loader) {
+                loader.style.display = 'none';
+            }
+        });
+
+        const mobileBtn = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (mobileBtn && mobileMenu) {
+            mobileBtn.addEventListener('click', function () {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+    </script>
+</body>
+
+</html>
